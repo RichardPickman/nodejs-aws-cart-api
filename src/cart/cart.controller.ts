@@ -19,16 +19,18 @@ import { CartService } from './services';
 @Controller('api/profile/cart')
 export class CartController {
   constructor(
-    private cartService: CartService,
-    private orderService: OrderService,
+    private readonly cartService: CartService,
+    private readonly orderService: OrderService,
   ) {}
 
   // @UseGuards(JwtAuthGuard)
   // @UseGuards(BasicAuthGuard)
   @Get()
   async findUserCart(@Req() req: AppRequest) {
+    console.log('Find cart by user id');
+
     const cart = await this.cartService.findOrCreateByUserId(
-      getUserIdFromRequest(req),
+      'b9fd3b81-a60d-4332-a9df-a7ab90fd5cf9',
     );
 
     return {
@@ -61,8 +63,8 @@ export class CartController {
   // @UseGuards(JwtAuthGuard)
   // @UseGuards(BasicAuthGuard)
   @Delete()
-  clearUserCart(@Req() req: AppRequest) {
-    this.cartService.removeByUserId(getUserIdFromRequest(req));
+  async clearUserCart(@Req() req: AppRequest) {
+    await this.cartService.removeByUserId(getUserIdFromRequest(req));
 
     return {
       statusCode: HttpStatus.OK,
@@ -90,7 +92,7 @@ export class CartController {
 
     const { id: cartId, items } = cart;
     const total = calculateCartTotal(cart);
-    const order = this.orderService.create({
+    const order = await this.orderService.create({
       ...body, // TODO: validate and pick only necessary data
       userId,
       cartId,

@@ -2,6 +2,7 @@ import {
   BaseEntity,
   Column,
   CreateDateColumn,
+  Entity,
   OneToMany,
   PrimaryGeneratedColumn,
   UpdateDateColumn,
@@ -19,22 +20,24 @@ export type Product = {
   price: number;
 };
 
-export class CartItem extends BaseEntity {
+@Entity()
+export class CartItemEntity extends BaseEntity {
   @PrimaryGeneratedColumn()
   cart_id: string;
 
-  @Column({ nullable: true })
+  @Column({ type: 'varchar', default: null })
   product_id: string;
 
-  @Column()
+  @Column({ type: 'int', default: null })
   count: number;
 }
 
-export class Cart extends BaseEntity {
+@Entity()
+export class CartEntity extends BaseEntity {
   @PrimaryGeneratedColumn()
   id: string;
 
-  @Column()
+  @Column({ type: 'varchar', default: null })
   user_id: string;
 
   @CreateDateColumn()
@@ -43,9 +46,9 @@ export class Cart extends BaseEntity {
   @UpdateDateColumn()
   updated_at: string;
 
-  @Column()
+  @Column({ type: 'varchar', default: null })
   status: CartStatuses;
 
-  @OneToMany(() => CartItem, (cartItem) => cartItem.cart_id)
-  items: CartItem[];
+  @OneToMany(() => CartItemEntity, (cartItem) => cartItem.cart_id)
+  items: CartItemEntity[];
 }

@@ -1,14 +1,18 @@
 import { Injectable } from '@nestjs/common';
 
+import { InjectRepository } from '@nestjs/typeorm';
 import { randomUUID } from 'crypto';
 import { Repository } from 'typeorm';
-import { Cart } from '../models';
+import { CartEntity } from '../models/cart.entity';
 
 @Injectable()
 export class CartService {
-  constructor(private readonly cartRepository: Repository<Cart>) {}
+  constructor(
+    @InjectRepository(CartEntity)
+    private readonly cartRepository: Repository<CartEntity>,
+  ) {}
 
-  async findByUserId(userId: string): Promise<Cart> {
+  async findByUserId(userId: string): Promise<CartEntity> {
     const user = await this.cartRepository.findOne({
       where: { user_id: userId },
     });
@@ -19,7 +23,7 @@ export class CartService {
   async createByUserId(userId: string) {
     const id = randomUUID();
 
-    const newCart = new Cart();
+    const newCart = new CartEntity();
 
     newCart.id = id;
     newCart.user_id = userId;
@@ -29,7 +33,7 @@ export class CartService {
     return userCart;
   }
 
-  async findOrCreateByUserId(userId: string): Promise<Cart> {
+  async findOrCreateByUserId(userId: string): Promise<CartEntity> {
     const userCart = await this.findByUserId(userId);
 
     if (userCart) {
@@ -39,7 +43,10 @@ export class CartService {
     return this.createByUserId(userId);
   }
 
-  async updateByUserId(userId: string, { items }: Cart): Promise<Cart> {
+  async updateByUserId(
+    userId: string,
+    { items }: CartEntity,
+  ): Promise<CartEntity> {
     const cart = await this.findOrCreateByUserId(userId);
 
     cart.items = [...items];
@@ -49,7 +56,7 @@ export class CartService {
     return updatedCart;
   }
 
-  async removeByUserId(userId): Promise<Cart> {
+  async removeByUserId(userId): Promise<CartEntity> {
     const cart = await this.cartRepository.findOne({
       where: { user_id: userId },
     });
