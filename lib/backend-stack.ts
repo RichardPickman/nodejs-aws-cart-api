@@ -1,4 +1,4 @@
-import { CfnOutput, Stack, StackProps } from 'aws-cdk-lib';
+import { CfnOutput, Duration, Stack, StackProps } from 'aws-cdk-lib';
 import { Cors, LambdaIntegration, RestApi } from 'aws-cdk-lib/aws-apigateway';
 import { Runtime } from 'aws-cdk-lib/aws-lambda';
 import {
@@ -47,6 +47,7 @@ export class BackendStack extends Stack {
         DB_DATABASE,
       },
       entry: path.join(rootDir, 'src', 'main.ts'),
+      timeout: Duration.seconds(10),
     });
 
     const api = new RestApi(this, 'Api', {
