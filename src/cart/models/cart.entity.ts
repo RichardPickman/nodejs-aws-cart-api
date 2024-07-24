@@ -3,41 +3,59 @@ import {
   Column,
   CreateDateColumn,
   Entity,
+  JoinColumn,
+  ManyToOne,
   OneToMany,
-  PrimaryGeneratedColumn,
+  OneToOne,
+  PrimaryColumn,
   UpdateDateColumn,
 } from 'typeorm';
 
-enum CartStatuses {
+export enum CartStatuses {
   OPEN = 'OPEN',
-  STATUS = 'STATUS',
+  ORDERED = 'ORDERED',
 }
 
-export type Product = {
+@Entity()
+export class ProductEntity extends BaseEntity {
+  @PrimaryColumn()
   id: string;
+
+  @Column({ type: 'varchar' })
   title: string;
+
+  @Column({ type: 'varchar' })
   description: string;
+
+  @Column({ type: 'integer' })
   price: number;
-};
+}
 
 @Entity()
 export class CartItemEntity extends BaseEntity {
-  @PrimaryGeneratedColumn()
-  cart_id: string;
+  @PrimaryColumn()
+  id: string;
 
-  @Column({ type: 'varchar', default: null })
+  @Column({ type: 'varchar' })
   product_id: string;
 
-  @Column({ type: 'int', default: null })
+  @Column({ type: 'integer' })
   count: number;
+
+  @OneToOne(() => ProductEntity)
+  @JoinColumn()
+  product: ProductEntity;
+
+  @ManyToOne(() => CartEntity, (cart) => cart.items, { onDelete: 'CASCADE' })
+  cart_id: string;
 }
 
 @Entity()
 export class CartEntity extends BaseEntity {
-  @PrimaryGeneratedColumn()
+  @PrimaryColumn()
   id: string;
 
-  @Column({ type: 'varchar', default: null })
+  @Column({ type: 'varchar' })
   user_id: string;
 
   @CreateDateColumn()
@@ -46,9 +64,11 @@ export class CartEntity extends BaseEntity {
   @UpdateDateColumn()
   updated_at: string;
 
-  @Column({ type: 'varchar', default: null })
+  @Column({ type: 'varchar' })
   status: CartStatuses;
 
-  @OneToMany(() => CartItemEntity, (cartItem) => cartItem.cart_id)
+  @OneToMany(() => CartItemEntity, (cartItem) => cartItem.cart_id, {
+    onDelete: 'CASCADE',
+  })
   items: CartItemEntity[];
 }
