@@ -41,8 +41,13 @@ export class CartService {
     newCart.user_id = userId;
     newCart.status = CartStatuses.OPEN;
 
+    await this.cartRepository.save(newCart);
+
     try {
-      const userCart = await this.cartRepository.save(newCart);
+      const userCart = await this.cartRepository.findOne({
+        where: { id: newCart.id },
+        relations: ['items', 'items.product'],
+      });
 
       return userCart;
     } catch (error) {

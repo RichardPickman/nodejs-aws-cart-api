@@ -18,7 +18,7 @@ export enum CartStatuses {
 
 @Entity()
 export class ProductEntity extends BaseEntity {
-  @PrimaryColumn()
+  @PrimaryColumn({ type: 'uuid' })
   id: string;
 
   @Column({ type: 'varchar' })
@@ -33,7 +33,7 @@ export class ProductEntity extends BaseEntity {
 
 @Entity()
 export class CartItemEntity extends BaseEntity {
-  @PrimaryColumn()
+  @PrimaryColumn({ type: 'uuid' })
   id: string;
 
   @Column({ type: 'varchar' })
@@ -52,7 +52,7 @@ export class CartItemEntity extends BaseEntity {
 
 @Entity()
 export class CartEntity extends BaseEntity {
-  @PrimaryColumn()
+  @PrimaryColumn({ type: 'uuid' })
   id: string;
 
   @Column({ type: 'varchar' })

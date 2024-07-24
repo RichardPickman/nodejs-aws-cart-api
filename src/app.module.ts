@@ -3,7 +3,6 @@ import { Module } from '@nestjs/common';
 import { AppController } from './app.controller';
 
 import { TypeOrmModule } from '@nestjs/typeorm';
-import * as dotenv from 'dotenv';
 import {
   DB_DATABASE,
   DB_HOST,
@@ -17,7 +16,6 @@ import { CartModule } from './cart/cart.module';
 import { OrderEntity } from './order';
 import { OrderModule } from './order/order.module';
 
-dotenv.config();
 @Module({
   imports: [
     AuthModule,
@@ -30,7 +28,7 @@ dotenv.config();
       username: DB_USERNAME,
       password: DB_PASSWORD,
       database: DB_DATABASE,
-      synchronize: true,
+      synchronize: false,
       ssl: {
         rejectUnauthorized: false,
       },

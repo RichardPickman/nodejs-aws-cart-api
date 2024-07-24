@@ -10,10 +10,10 @@ import { CartEntity, CartItemEntity } from '../../cart/models/cart.entity';
 
 @Entity()
 export class OrderEntity extends BaseEntity {
-  @PrimaryColumn()
+  @PrimaryColumn({ type: 'uuid' })
   id: string;
 
-  @Column()
+  @Column({ type: 'varchar' })
   userId: string;
 
   @OneToOne(() => CartEntity)
@@ -35,12 +35,12 @@ export class OrderEntity extends BaseEntity {
     address: any;
   };
 
-  @Column({ nullable: true })
+  @Column({ type: 'varchar', nullable: true })
   comments: string;
 
-  @Column()
+  @Column({ type: 'varchar' })
   status: string;
 
-  @Column()
+  @Column({ type: 'integer' })
   total: number;
 }

@@ -29,6 +29,13 @@ export class CartController {
   // @UseGuards(BasicAuthGuard)
   @Get()
   async findUserCart(@Body('userId') userId: string) {
+    if (!userId) {
+      throw new HttpException(
+        'User id is required: Body is { "userId": "123" }',
+        HttpStatus.BAD_REQUEST,
+      );
+    }
+
     const cart = await this.cartService.findOrCreateByUserId(userId);
     const cartExistAndNotEmpty = cart && cart.items.length;
 
