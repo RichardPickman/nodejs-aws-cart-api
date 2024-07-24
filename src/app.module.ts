@@ -3,14 +3,21 @@ import { Module } from '@nestjs/common';
 import { AppController } from './app.controller';
 
 import { TypeOrmModule } from '@nestjs/typeorm';
-import dotenv from 'dotenv';
-import path from 'path';
+import * as dotenv from 'dotenv';
+import {
+  DB_DATABASE,
+  DB_HOST,
+  DB_PASSWORD,
+  DB_PORT,
+  DB_USERNAME,
+} from '../constants/credentials';
 import { AuthModule } from './auth/auth.module';
+import { CartEntity, CartItemEntity, ProductEntity } from './cart';
 import { CartModule } from './cart/cart.module';
+import { OrderEntity } from './order';
 import { OrderModule } from './order/order.module';
 
 dotenv.config();
-
 @Module({
   imports: [
     AuthModule,
@@ -18,16 +25,16 @@ dotenv.config();
     OrderModule,
     TypeOrmModule.forRoot({
       type: 'postgres',
-      host: process.env.DB_HOST,
-      port: Number(process.env.DB_PORT) || 5432,
-      username: process.env.DB_USERNAME,
-      password: process.env.DB_PASSWORD,
-      database: process.env.DB_DATABASE,
-      synchronize: false,
+      host: DB_HOST,
+      port: Number(DB_PORT) || 5432,
+      username: DB_USERNAME,
+      password: DB_PASSWORD,
+      database: DB_DATABASE,
+      synchronize: true,
       ssl: {
         rejectUnauthorized: false,
       },
-      entities: [path.join(__dirname, '../') + '/**/*.entity{.ts,.js}'],
+      entities: [CartItemEntity, CartEntity, ProductEntity, OrderEntity],
     }),
   ],
   controllers: [AppController],
