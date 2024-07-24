@@ -20,7 +20,7 @@ const rootDir = path.join(__dirname, '..');
 export const commonLambdaProps: NodejsFunctionProps = {
   runtime: Runtime.NODEJS_20_X,
   projectRoot: rootDir,
-  depsLockFilePath: path.join(rootDir, 'package-lock.json'),
+  depsLockFilePath: path.join(rootDir, 'pnpm-lock.yaml'),
   bundling: {
     externalModules: [
       'aws-sdk',
@@ -46,7 +46,7 @@ export class BackendStack extends Stack {
         DB_PASSWORD,
         DB_DATABASE,
       },
-      entry: path.join(rootDir, 'src', 'main.ts'),
+      entry: path.join(rootDir, 'dist', 'src', 'main.js'),
       timeout: Duration.seconds(10),
     });
 
