@@ -28,24 +28,15 @@ export class CartController {
   // @UseGuards(JwtAuthGuard)
   // @UseGuards(BasicAuthGuard)
   @Get()
-  async findUserCart(@Body('userId') userId: string) {
-    if (!userId) {
-      throw new HttpException(
-        'User id is required: Body is { "userId": "123" }',
-        HttpStatus.BAD_REQUEST,
-      );
-    }
+  async findUserCart() {
+    const userId = '123';
 
     const cart = await this.cartService.findOrCreateByUserId(userId);
     const cartExistAndNotEmpty = cart && cart.items.length;
 
     return {
-      statusCode: HttpStatus.OK,
-      message: 'OK',
-      data: {
-        cart,
-        total: cartExistAndNotEmpty ? calculateCartTotal(cart) : 0,
-      },
+      cart,
+      total: cartExistAndNotEmpty ? calculateCartTotal(cart) : 0,
     };
   }
 
@@ -54,19 +45,15 @@ export class CartController {
   @Put()
   async updateUserCart(
     @Req() req: AppRequest,
-    @Body() body: Partial<CartEntity> & { userId: string },
+    @Body() body: Partial<CartEntity>,
   ) {
-    const userId = body.userId;
+    const userId = '123';
     // TODO: validate body payload...
     const cart = await this.cartService.updateByUserId(userId, body);
 
     return {
-      statusCode: HttpStatus.OK,
-      message: 'OK',
-      data: {
-        cart,
-        total: calculateCartTotal(cart),
-      },
+      cart,
+      total: calculateCartTotal(cart),
     };
   }
 
@@ -74,7 +61,7 @@ export class CartController {
   // @UseGuards(BasicAuthGuard)
   @Delete()
   async clearUserCart(@Req() req: AppRequest, @Body() body) {
-    const userId = body.userId;
+    const userId = '123';
     await this.cartService.removeByUserId(userId);
 
     return {
@@ -87,7 +74,7 @@ export class CartController {
   // @UseGuards(BasicAuthGuard)
   @Post('checkout')
   async checkout(@Req() req: AppRequest, @Body() body) {
-    const userId = body.userId;
+    const userId = '123';
     const cart = await this.cartService.findByUserId(userId);
     const cartExistAndNotEmpty = cart && cart.items.length;
 
@@ -101,7 +88,7 @@ export class CartController {
       ...body, // TODO: validate and pick only necessary data
       payment: JSON.stringify({}),
       delivery: JSON.stringify({}),
-      status: 'FINISHED',
+      status: 'ORDERED',
       userId,
       cartId,
       items,
@@ -113,11 +100,7 @@ export class CartController {
         status: CartStatuses.ORDERED,
       });
 
-      return {
-        statusCode: HttpStatus.OK,
-        message: 'OK',
-        data: { order },
-      };
+      return order;
     } catch (error) {
       console.log(error);
 

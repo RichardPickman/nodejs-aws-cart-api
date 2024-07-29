@@ -1,6 +1,6 @@
 import { CfnOutput, Duration, Stack, StackProps } from 'aws-cdk-lib';
 import { Cors, LambdaIntegration, RestApi } from 'aws-cdk-lib/aws-apigateway';
-import { Runtime } from 'aws-cdk-lib/aws-lambda';
+import { Code, Runtime } from 'aws-cdk-lib/aws-lambda';
 import {
   NodejsFunction,
   NodejsFunctionProps,
@@ -20,16 +20,11 @@ const rootDir = path.join(__dirname, '..');
 export const commonLambdaProps: NodejsFunctionProps = {
   runtime: Runtime.NODEJS_20_X,
   projectRoot: rootDir,
-  depsLockFilePath: path.join(rootDir, 'pnpm-lock.yaml'),
+  depsLockFilePath: path.join(rootDir, 'package-lock.json'),
   bundling: {
-    externalModules: [
-      'aws-sdk',
-      '@nestjs/microservices',
-      '@nestjs/websockets',
-      'class-transformer',
-      'class-validator',
-    ],
-    minify: true,
+    externalModules: ['aws-sdk'],
+    sourceMap: true,
+    minify: false,
   },
 };
 
@@ -46,7 +41,8 @@ export class BackendStack extends Stack {
         DB_PASSWORD,
         DB_DATABASE,
       },
-      entry: path.join(rootDir, 'dist', 'src', 'main.js'),
+      code: Code.fromAsset(path.join(rootDir, 'dist')),
+      handler: 'main.handler',
       timeout: Duration.seconds(10),
     });
 
@@ -57,11 +53,10 @@ export class BackendStack extends Stack {
 
     api.root.addProxy({
       defaultIntegration: new LambdaIntegration(backendHandler),
-      anyMethod: true,
       defaultCorsPreflightOptions: {
         allowOrigins: Cors.ALL_ORIGINS,
-        allowMethods: Cors.ALL_METHODS,
         allowHeaders: Cors.DEFAULT_HEADERS,
+        allowMethods: Cors.ALL_METHODS,
       },
     });
 
