@@ -21,6 +21,10 @@ export class CartService {
     private readonly productRepository: Repository<ProductEntity>,
   ) {}
 
+  async getProducts(): Promise<ProductEntity[]> {
+    return this.productRepository.find();
+  }
+
   async findByUserId(userId: string): Promise<CartEntity> {
     console.log('Trying to find cart by user id');
     const user = await this.cartRepository.findOne({
@@ -72,22 +76,15 @@ export class CartService {
     const id = randomUUID();
 
     const cartItem = new CartItemEntity();
-
-    for (const [key, value] of Object.entries(data)) {
-      cartItem[key] = value;
-    }
-
     const product = await this.productRepository.findOne({
       where: { id: data.product_id },
     });
 
-    cartItem.product = product;
     cartItem.id = id;
-
-    console.log(
-      'Finish constructing cart item. Proceed to save item: ',
-      cartItem,
-    );
+    cartItem.product = product;
+    cartItem.cart_id = data.cart_id;
+    cartItem.product_id = product.id;
+    cartItem.count = data.count;
 
     const result = await this.cartItemRepository.save(cartItem);
 
@@ -104,8 +101,6 @@ export class CartService {
       cartItem[key] = value;
     }
 
-    console.log('Finish updating cart item: ', cartItem);
-
     const result = await this.cartItemRepository.save(cartItem);
 
     return result;
@@ -113,20 +108,36 @@ export class CartService {
 
   async updateByUserId(
     userId: string,
-    { items, ...rest }: Partial<CartEntity>,
+    { items }: Partial<CartEntity>,
   ): Promise<CartEntity> {
-    console.log('Starting to update cart by user id');
     const cart = await this.findOrCreateByUserId(userId);
-
-    console.log('Cart before update: ', cart);
 
     if (items) {
       for (const item of items) {
-        const isExist = !!item.id;
+        const existingProduct = cart.items.find(
+          (product) => product.product_id === item.product_id,
+        );
+
+        const isNewCountEqualsZero = item.count === 0;
+
+        if (isNewCountEqualsZero) {
+          const product = await this.cartItemRepository.findOne({
+            where: { id: existingProduct.id },
+          });
+
+          await this.cartItemRepository.remove(product);
+
+          continue;
+        }
+
+        const isExist = !!existingProduct;
 
         if (isExist) {
           console.log('Item exists. Updating item');
-          const cartItem = await this.updateItem(item.id, { ...item });
+          const cartItem = await this.updateItem(item.id, {
+            ...existingProduct,
+            ...item,
+          });
 
           cart.items = cart.items.map((item) =>
             item.id === cartItem.id ? cartItem : item,
@@ -135,16 +146,14 @@ export class CartService {
 
         if (!isExist) {
           console.log('Item does not exist. Creating item');
-          const cartItem = await this.createItem({ ...item });
+          const cartItem = await this.createItem({ ...item, cart_id: cart.id });
 
           cart.items.push(cartItem);
         }
       }
     }
 
-    for (const [key, value] of Object.entries(rest)) {
-      cart[key] = value;
-    }
+    cart.user_id = userId;
 
     const updatedCart = await this.cartRepository.save(cart);
 
