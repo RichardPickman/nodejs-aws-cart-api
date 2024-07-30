@@ -29,6 +29,9 @@ export class ProductEntity extends BaseEntity {
 
   @Column({ type: 'integer' })
   price: number;
+
+  @Column({ type: 'integer', default: 100 })
+  count: number;
 }
 
 @Entity()
@@ -42,7 +45,7 @@ export class CartItemEntity extends BaseEntity {
   @Column({ type: 'integer' })
   count: number;
 
-  @OneToOne(() => ProductEntity)
+  @OneToOne(() => ProductEntity, { onDelete: 'CASCADE' })
   @JoinColumn()
   product: ProductEntity;
 
