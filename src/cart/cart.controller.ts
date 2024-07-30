@@ -8,9 +8,10 @@ import {
   Post,
   Put,
   Req,
+  UseGuards,
 } from '@nestjs/common';
 
-// import { BasicAuthGuard, JwtAuthGuard } from '../auth';
+import { BasicAuthGuard } from '../auth';
 import { OrderService } from '../order';
 import { AppRequest } from '../shared';
 
@@ -25,13 +26,18 @@ export class CartController {
     private readonly orderService: OrderService,
   ) {}
 
-  // @UseGuards(JwtAuthGuard)
-  // @UseGuards(BasicAuthGuard)
-  @Get()
-  async findUserCart() {
-    const userId = '123';
+  @Get('products')
+  async getProducts(@Req() req: AppRequest) {
+    const products = await this.cartService.getProducts();
 
-    const cart = await this.cartService.findOrCreateByUserId(userId);
+    return products;
+  }
+
+  // @UseGuards(JwtAuthGuard)
+  @UseGuards(BasicAuthGuard)
+  @Get()
+  async findUserCart(@Req() req: AppRequest) {
+    const cart = await this.cartService.findOrCreateByUserId(req.user.id);
     const cartExistAndNotEmpty = cart && cart.items.length;
 
     return {
@@ -41,15 +47,13 @@ export class CartController {
   }
 
   // @UseGuards(JwtAuthGuard)
-  // @UseGuards(BasicAuthGuard)
+  @UseGuards(BasicAuthGuard)
   @Put()
   async updateUserCart(
     @Req() req: AppRequest,
     @Body() body: Partial<CartEntity>,
   ) {
-    const userId = '123';
-    // TODO: validate body payload...
-    const cart = await this.cartService.updateByUserId(userId, body);
+    const cart = await this.cartService.updateByUserId(req.user.id, body);
 
     return {
       cart,
@@ -58,7 +62,7 @@ export class CartController {
   }
 
   // @UseGuards(JwtAuthGuard)
-  // @UseGuards(BasicAuthGuard)
+  @UseGuards(BasicAuthGuard)
   @Delete()
   async clearUserCart(@Req() req: AppRequest, @Body() body) {
     const userId = '123';
@@ -71,11 +75,10 @@ export class CartController {
   }
 
   // @UseGuards(JwtAuthGuard)
-  // @UseGuards(BasicAuthGuard)
+  @UseGuards(BasicAuthGuard)
   @Post('checkout')
   async checkout(@Req() req: AppRequest, @Body() body) {
-    const userId = '123';
-    const cart = await this.cartService.findByUserId(userId);
+    const cart = await this.cartService.findByUserId(req.user.id);
     const cartExistAndNotEmpty = cart && cart.items.length;
 
     if (!cartExistAndNotEmpty) {
@@ -89,14 +92,14 @@ export class CartController {
       payment: JSON.stringify({}),
       delivery: JSON.stringify({}),
       status: 'ORDERED',
-      userId,
+      userId: req.user.id,
       cartId,
       items,
       total,
     });
 
     try {
-      await this.cartService.updateByUserId(userId, {
+      await this.cartService.updateByUserId(req.user.id, {
         status: CartStatuses.ORDERED,
       });
 
