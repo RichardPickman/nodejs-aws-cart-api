@@ -1,0 +1,7 @@
+./node_modules
+./test
+.gitignore
+.prettierrc
+Dockerfile
+LICENSE
+README.md
