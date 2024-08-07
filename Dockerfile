@@ -6,8 +6,6 @@ FROM node:20-alpine As development
 
 WORKDIR /usr/src/app
 
-ENV NODE_ENV production
-
 COPY --chown=node:node ./package.json ./
 
 RUN npm install
@@ -39,6 +37,7 @@ RUN npm ci --only=production && npm cache clean --force
 
 USER node
 
+
 ###################
 # PRODUCTION
 ###################
@@ -49,6 +48,6 @@ COPY --chown=node:node --from=build /usr/src/app/node_modules ./node_modules
 COPY --chown=node:node --from=build /usr/src/app/dist ./dist
 COPY --chown=node:node .env .
 
-EXPOSE 5000
+EXPOSE 80
 
 CMD [ "node", "dist/main" ]
