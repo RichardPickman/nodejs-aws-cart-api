@@ -4,7 +4,7 @@ import { NestFactory } from '@nestjs/core';
 import helmet from 'helmet';
 import { AppModule } from './app.module';
 
-const port = process.env.PORT || 80;
+const port = process.env.PORT || 4000;
 
 let server;
 
