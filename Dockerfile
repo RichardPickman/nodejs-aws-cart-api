@@ -38,7 +38,6 @@ RUN npm ci --only=production && npm cache clean --force
 
 FROM node:20-alpine As production
 
-COPY --chown=node:node --from=build /usr/src/app/node_modules ./node_modules
 COPY --chown=node:node --from=build /usr/src/app/dist ./dist
 
 USER node
