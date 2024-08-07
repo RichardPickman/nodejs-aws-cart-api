@@ -6,11 +6,15 @@ FROM node:20-alpine As development
 
 WORKDIR /usr/src/app
 
-COPY ./package.json ./
+ENV NODE_ENV production
+
+COPY --chown=node:node ./package.json ./
 
 RUN npm install
 
-COPY . .
+COPY --chown=node:node . .
+
+USER node
 
 
 ###################
@@ -23,14 +27,17 @@ WORKDIR /usr/src/app
 
 ENV NODE_ENV production
 
-COPY  --from=development /usr/src/app/node_modules ./node_modules
-COPY  --from=development /usr/src/app/package-lock.json ./package-lock.json
-COPY  . .
+COPY --chown=node:node --from=development /usr/src/app/node_modules ./node_modules
+COPY --chown=node:node --from=development /usr/src/app/package-lock.json ./package-lock.json
+COPY --chown=node:node . .
 
 RUN npm run build
 
+ENV NODE_ENV production
+
 RUN npm ci --only=production && npm cache clean --force
 
+USER node
 
 ###################
 # PRODUCTION
@@ -39,9 +46,10 @@ RUN npm ci --only=production && npm cache clean --force
 FROM node:20-alpine As production
 
 COPY --chown=node:node --from=build /usr/src/app/dist ./dist
-
-USER node
+COPY --chown=node:node .env .
 
 EXPOSE 4000
+
+USER node
 
 CMD [ "node", "dist/main" ]
