@@ -1,5 +1,12 @@
-./node_modules
+
+# ignore AWS related files, since it's only required once after implementing the task
+./bin
+./lib
+
+# ignore test files since it's only required once after implementing the task
 ./test
+
+# ignore project files
 .gitignore
 .prettierrc
 Dockerfile
